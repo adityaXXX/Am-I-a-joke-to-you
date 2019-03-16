@@ -20,7 +20,7 @@ app.title = 'THREAT MAP'
 plotly.tools.set_credentials_file(username='amber.sa97', api_key='oGPcE8EP76oYLaSfm1y5')
 mapbox_access_token = 'pk.eyJ1IjoiYW1iZXItc2F4ZW5hIiwiYSI6ImNqdDk1d3p5NzAydXEzeW1kMTYyMG9xZmsifQ.OoExrgP7MJoOvCBduoNy1w'
 df = pd.read_csv("dash.csv")
-df.drop(['Unnamed: 0'], axis = 1, inplace = True)
+df.drop(['Unnamed: 0', 'eventid'], axis = 1, inplace = True)
 
 # Selecting only required columns
 
@@ -198,12 +198,12 @@ app.layout = html.Div(
                     style = layout_table,
                     className="six columns"
                 ),
-                html.Div([
-                        dcc.Graph(
-                            id='bar-graph'
-                        )
-                    ], className= 'twelve columns'
-                    ),
+                # html.Div([
+                #         dcc.Graph(
+                #             id='bar-graph'
+                #         )
+                #     ], className= 'twelve columns'
+                #     ),
                 html.Div(
                     [
                         html.P('Developed by Am I a joke to you - ', style = {'display': 'inline'})
@@ -221,7 +221,21 @@ app.layout = html.Div(
      Input('datatable', 'selected_row_indices')])
 def map_selection(rows, selected_row_indices):
     aux = pd.DataFrame(rows)
-    temp_df = aux.ix[selected_row_indices, :]
+    # print("dataframe = {}".format(aux))
+    # print("row = {}".format(selected_row_indices))
+    # temp_df = aux[aux.provstate == aux.loc[selected_row_indices, 4]]
+    c = 0
+    temp_df = pd.DataFrame()
+    for i in selected_row_indices:
+        df = aux[aux.provstate == aux.loc[i, "provstate"]]
+        if c == 0:
+            temp_df = df
+            c += 1
+            continue
+        else:
+            temp_df = pd.concat([df, temp_df], axis=0)
+
+    # print(aux.loc[selected_row_indices, "provstate"])
     if len(selected_row_indices) == 0:
         return gen_map(aux)
     return gen_map(temp_df)
@@ -230,53 +244,53 @@ app.config['suppress_callback_exceptions']=True
 @app.callback(
     Output('datatable', 'rows'),
     [Input('type', 'value'),
-     Input('boroughs', 'values')])
-def update_selected_row_indices(type, borough):
+     Input('provstate', 'values')])
+def update_selected_row_indices(type, provstate):
     map_aux = df.copy()
 
     # Threat filter
     map_aux = map_aux[map_aux['Threat'].isin(type)]
     # Boroughs filter
-    map_aux = map_aux[map_aux["Borough"].isin(borough)]
+    map_aux = map_aux[map_aux["provstate"].isin(provstate)]
 
     rows = map_aux.to_dict('records')
     return rows
 
-@app.callback(
-    Output('bar-graph', 'figure'),
-    [Input('datatable', 'rows'),
-     Input('datatable', 'selected_row_indices')])
-def update_figure(rows, selected_row_indices):
-    dff = pd.DataFrame(rows)
+# @app.callback(
+#     Output('bar-graph', 'figure'),
+#     [Input('datatable', 'rows'),
+#      Input('datatable', 'selected_row_indices')])
+# def update_figure(rows, selected_row_indices):
+#     dff = pd.DataFrame(rows)
+#
+#     layout = go.Layout(
+#         bargap=0.05,
+#         bargroupgap=0,
+#         barmode='group',
+#         showlegend=False,
+#         dragmode="select",
+#         xaxis=dict(
+#             showgrid=False,
+#             nticks=50,
+#             fixedrange=False
+#         ),
+#         yaxis=dict(
+#             showticklabels=True,
+#             showgrid=False,
+#             fixedrange=False,
+#             rangemode='nonnegative',
+#             zeroline=False
+#         )
+#     )
 
-    layout = go.Layout(
-        bargap=0.05,
-        bargroupgap=0,
-        barmode='group',
-        showlegend=False,
-        dragmode="select",
-        xaxis=dict(
-            showgrid=False,
-            nticks=50,
-            fixedrange=False
-        ),
-        yaxis=dict(
-            showticklabels=True,
-            showgrid=False,
-            fixedrange=False,
-            rangemode='nonnegative',
-            zeroline='hidden'
-        )
-    )
+    # data = Data([
+    #      go.Bar(
+    #          x=dff.groupby('Borough', as_index = False).count()['Borough'],
+    #          y=dff.groupby('Borough', as_index = False).count()['Threat']
+    #      )
+    #  ])
 
-    data = Data([
-         go.Bar(
-             x=dff.groupby('Borough', as_index = False).count()['Borough'],
-             y=dff.groupby('Borough', as_index = False).count()['Threat']
-         )
-     ])
-
-    return go.Figure(data=data, layout=layout)
+    # return go.Figure(data=data, layout=layout)
 
 if __name__ == '__main__':
     app.run_server(debug=True)
