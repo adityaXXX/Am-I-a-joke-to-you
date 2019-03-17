@@ -20,7 +20,8 @@ app.title = 'THREAT MAP'
 plotly.tools.set_credentials_file(username='amber.sa97', api_key='oGPcE8EP76oYLaSfm1y5')
 mapbox_access_token = 'pk.eyJ1IjoiYW1iZXItc2F4ZW5hIiwiYSI6ImNqdDk1d3p5NzAydXEzeW1kMTYyMG9xZmsifQ.OoExrgP7MJoOvCBduoNy1w'
 df = pd.read_csv("dash.csv")
-df.drop(['Unnamed: 0', 'eventid'], axis = 1, inplace = True)
+df1=df.drop(['Unnamed: 0','iyear','latitude','provstate','longitude','city'],axis=1)
+df.drop(['Unnamed: 0'], axis = 1, inplace = True)
 
 # Selecting only required columns
 
@@ -36,6 +37,7 @@ for i in range(101):
     k.append(l)
 
 #  Layouts
+
 layout_table = dict(
     autosize=True,
     height=500,
@@ -100,8 +102,8 @@ def gen_map(df):
                 "marker": {
                     "colorscale" : k,
                     "color" : df['Threat'],
-                    "size": 6,
-                    "opacity": 0.7
+                    "size": 12,
+                    "opacity": 0.4
                 }
         }],
         "layout": layout_map
@@ -188,7 +190,7 @@ app.layout = html.Div(
                     [
                         dt.DataTable(
                             rows=df.to_dict('records'),
-                            columns=df.columns,
+                            columns=df1.columns,
                             row_selectable=True,
                             filterable=True,
                             sortable=True,
@@ -293,4 +295,4 @@ def update_selected_row_indices(type, provstate):
     # return go.Figure(data=data, layout=layout)
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, host='0.0.0.0', port=8080)
