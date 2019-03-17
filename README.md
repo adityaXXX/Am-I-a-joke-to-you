@@ -1,7 +1,18 @@
 # HackFest
 
-**GLIMPSE OF OUR APP**
+## **GLIMPSE OF OUR APP**
 
 ![](GIF.gif)
 
-Suppose the model predicts 'Jammu and Kashmir' Our tool will display the threat level in that state.
+**Dataset** : https://www.kaggle.com/START-UMD/gtd
+
+To run the server:-
+```
+python temp.py
+```
+
+### Description
+- **GTD.py** : Data preprocessing
+- **encoded.csv** : Final Encoded Dataset ready for Training
+- **ANN.py** : Deep Learning Model for Prediction
+- **temp.py** : Final Server File
