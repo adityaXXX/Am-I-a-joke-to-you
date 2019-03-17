@@ -16,3 +16,4 @@ python temp.py
 - **encoded.csv** : Final Encoded Dataset ready for Training
 - **ANN.py** : Deep Learning Model for Prediction
 - **temp.py** : Final Server File
+- **model.sav** : Trained Model
